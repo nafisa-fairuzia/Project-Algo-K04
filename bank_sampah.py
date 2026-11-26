@@ -3,20 +3,20 @@ import pandas as pd
 
 # Tugas: Abizar (Tampilan banner awal)
 def banner_selamat_datang():
-    print("╔══════════════════════════════════════════════════════╗")
-    print("║             SISTEM MANAJEMEN BANK SAMPAH             ║")
-    print("║          FASILKOM - UNIVERSITAS JEMBER 2026          ║")
-    print("╠══════════════════════════════════════════════════════╣")
-    print("║  Ubah Sampah Jadi Berkah, Kumpulkan Poin & Sembako   ║")
-    print("╚══════════════════════════════════════════════════════╝")
+    print("====================================================")
+    print("            SISTEM MANAJEMEN BANK SAMPAH            ")
+    print("         FASILKOM - UNIVERSITAS JEMBER 2026         ")
+    print("====================================================")
+    print(" Ubah Sampah Jadi Berkah, Kumpulkan Poin & Sembako  ")
+    print("====================================================")
 
 
 # Tugas: Abizar (Menu utama dinamis admin dan petugas)
-def tampil_menu(peran):
+def tampil_menu(peran, nama_petugas):
     if peran == "admin":
-        print("\nRole Aktif: ADMINISTRATOR")
+        print("\nRole Aktif: ADMINISTRATOR (" + nama_petugas + ")")
     else:
-        print("\nRole Aktif: PETUGAS LOKET")
+        print("\nRole Aktif: PETUGAS LOKET (" + nama_petugas + ")")
     print("---------------------------------------------")
     print("1.  Tampilkan semua setoran")
     print("2.  Tambah setoran")
@@ -43,13 +43,14 @@ def tampil_menu(peran):
         print("10. Keluar")
     print("---------------------------------------------")
 
+
 # Tugas: Habibi (Autentikasi login multi-role admin dan petugas)
 def login():
     kesempatan = 3
     while kesempatan > 0:
         print("\n--- Silakan Login (Sisa Kesempatan:", kesempatan, ") ---")
-        username = input("Username : ")
-        password = input("Password : ")
+        username = input("Username : ").strip().lower()
+        password = input("Password : ").strip()
 
         if password.isdigit() == False:
             print("Password harus angka.")
@@ -57,10 +58,19 @@ def login():
             print("Sisa kesempatan:", kesempatan)
         elif username == "admin" and password == "123456":
             print("\nLogin berhasil. Selamat datang, admin.")
-            return "admin"
-        elif username == "petugas" and password == "111111":
-            print("\nLogin berhasil. Selamat datang, petugas.")
-            return "petugas"
+            return "admin", "admin"
+        elif username == "habibi" and password == "111111":
+            print("\nLogin berhasil. Selamat datang, habibi.")
+            return "petugas", "habibi"
+        elif username == "gala" and password == "222222":
+            print("\nLogin berhasil. Selamat datang, gala.")
+            return "petugas", "gala"
+        elif username == "nafisa" and password == "333333":
+            print("\nLogin berhasil. Selamat datang, nafisa.")
+            return "petugas", "nafisa"
+        elif username == "abizar" and password == "444444":
+            print("\nLogin berhasil. Selamat datang, abizar.")
+            return "petugas", "abizar"
         else:
             kesempatan = kesempatan - 1
             print("Username atau password salah. Sisa kesempatan:", kesempatan)
@@ -125,19 +135,22 @@ def muat_data():
         data = pd.read_csv("bank_sampah.csv")
         if len(data) == 0:
             raise FileNotFoundError
+        if "Petugas" not in data.columns:
+            data["Petugas"] = "petugas"
+            data.to_csv("bank_sampah.csv", index=False)
     except (FileNotFoundError, pd.errors.EmptyDataError):
         data = pd.DataFrame([
-            ["Budi", "Plastik", 5, 50, 15000],
-            ["Siti", "Kertas", 8, 80, 16000],
-            ["Andi", "Kardus", 4, 40, 10000],
-            ["Dewi", "Kaleng/Logam", 3, 30, 15000],
-            ["Rizky", "Botol Kaca", 10, 100, 10000],
-            ["Budi", "Kertas", 6, 60, 12000],
-            ["Siti", "Plastik", 7, 70, 21000],
-            ["Andi", "Kaleng/Logam", 2, 20, 10000],
-            ["Dewi", "Kardus", 9, 90, 22500],
-            ["Rizky", "Plastik", 12, 120, 36000]
-        ], columns=["Nama", "Jenis", "Berat", "Poin", "Rupiah"])
+            ["Budi", "Plastik", 5, 50, 15000, "habibi"],
+            ["Siti", "Kertas", 8, 80, 16000, "gala"],
+            ["Andi", "Kardus", 4, 40, 10000, "nafisa"],
+            ["Dewi", "Kaleng/Logam", 3, 30, 15000, "abizar"],
+            ["Rizky", "Botol Kaca", 10, 100, 10000, "habibi"],
+            ["Budi", "Kertas", 6, 60, 12000, "gala"],
+            ["Siti", "Plastik", 7, 70, 21000, "nafisa"],
+            ["Andi", "Kaleng/Logam", 2, 20, 10000, "abizar"],
+            ["Dewi", "Kardus", 9, 90, 22500, "habibi"],
+            ["Rizky", "Plastik", 12, 120, 36000, "gala"]
+        ], columns=["Nama", "Jenis", "Berat", "Poin", "Rupiah", "Petugas"])
         data.to_csv("bank_sampah.csv", index=False)
     return data
 
@@ -173,45 +186,23 @@ def muat_tukar():
         data_tukar.to_csv("penukaran.csv", index=False)
     return data_tukar
 
-# Tugas: Abizar (Format tampilan cetak tabel setoran)
-def tampilkan_tabel(kolom, baris_data):
-    lebar_kolom = []
-    for i in range(len(kolom)):
-        lebar = len(str(kolom[i]))
-        for baris in baris_data:
-            if len(str(baris[i])) > lebar:
-                lebar = len(str(baris[i]))
-        lebar_kolom.append(lebar)
-
-    garis = "+"
-    for lebar in lebar_kolom:
-        garis = garis + "-" * (lebar + 2) + "+"
-
-    print(garis)
-    teks_kolom = []
-    for i in range(len(kolom)):
-        teks_kolom.append(str(kolom[i]).ljust(lebar_kolom[i]))
-    print("| " + " | ".join(teks_kolom) + " |")
-    print(garis)
-
-    for baris in baris_data:
-        teks_baris = []
-        for i in range(len(kolom)):
-            teks_baris.append(str(baris[i]).ljust(lebar_kolom[i]))
-        print("| " + " | ".join(teks_baris) + " |")
-    print(garis)
-
 
 # Tugas: Abizar (Format tampilan cetak tabel setoran)
 def tampilkan_data(data):
-    baris_tabel = []
+    print("---------------------------------------------------------------------------------")
+    print("No  Nama      Jenis          Berat    Poin      Rupiah         Petugas")
+    print("---------------------------------------------------------------------------------")
     for i in range(len(data)):
         baris = data.iloc[i]
-        baris_tabel.append([
-            i + 1, baris["Nama"], baris["Jenis"], str(baris["Berat"]) + " kg",
-            str(baris["Poin"]) + " poin", "Rp" + str(baris["Rupiah"])
-        ])
-    tampilkan_tabel(["No", "Nama", "Jenis Sampah", "Berat", "Poin", "Rupiah"], baris_tabel)
+        no_teks = str(i + 1).ljust(4)
+        nama_teks = str(baris["Nama"]).ljust(10)
+        jenis_teks = str(baris["Jenis"]).ljust(15)
+        berat_teks = (str(baris["Berat"]) + " kg").ljust(9)
+        poin_teks = (str(baris["Poin"]) + " poin").ljust(10)
+        rupiah_teks = ("Rp" + str(baris["Rupiah"])).ljust(15)
+        petugas_teks = str(baris.get("Petugas", "-"))
+        print(no_teks + nama_teks + jenis_teks + berat_teks + poin_teks + rupiah_teks + petugas_teks)
+    print("---------------------------------------------------------------------------------")
 
 
 # Tugas: Abizar (Modul tampilkan data setoran)
@@ -223,8 +214,14 @@ def tampilkan(data):
         tampilkan_data(data)
 
 
+def cetak_daftar_harga(harga):
+    print("Daftar Harga Sampah:")
+    for i in range(len(harga)):
+        print(str(i + 1) + ". " + str(harga[i][0]) + " - Rp" + str(harga[i][1]) + "/kg")
+
+
 # Tugas: Gala (Tambah data setoran baru & validasi berat)
-def tambah(data, harga):
+def tambah(data, harga, nama_petugas="admin"):
     print("\nTambah Setoran:")
     nama = input("Nama nasabah : ").strip()
     if nama == "":
@@ -235,10 +232,7 @@ def tambah(data, harga):
         return
 
     print("Jenis sampah:")
-    baris_harga = []
-    for i in range(len(harga)):
-        baris_harga.append([i + 1, harga[i][0], "Rp" + str(harga[i][1]) + "/kg"])
-    tampilkan_tabel(["No", "Jenis Sampah", "Harga per kg"], baris_harga)
+    cetak_daftar_harga(harga)
 
     pilih_jenis = input("Pilih jenis (1-" + str(len(harga)) + "): ")
     cek_valid = False
@@ -270,20 +264,16 @@ def tambah(data, harga):
     poin = int(berat * 10)
     rupiah = int(berat * harga_kg)
 
-    data.loc[len(data)] = [nama, jenis, berat, poin, rupiah]
+    data.loc[len(data)] = [nama, jenis, berat, poin, rupiah, nama_petugas]
     data.to_csv("bank_sampah.csv", index=False)
 
     print("\nRingkasan Setoran:")
-    tampilkan_tabel(
-        ["Keterangan", "Nilai"],
-        [
-            ["Nama", nama],
-            ["Jenis", jenis],
-            ["Berat", str(berat) + " kg"],
-            ["Poin", poin],
-            ["Rupiah", "Rp" + str(rupiah)]
-        ]
-    )
+    print("Nama    :", nama)
+    print("Jenis   :", jenis)
+    print("Berat   :", berat, "kg")
+    print("Poin    :", poin)
+    print("Rupiah  : Rp", rupiah)
+    print("Petugas :", nama_petugas)
     print("Data berhasil disimpan.")
 
 
@@ -310,19 +300,12 @@ def ubah(data, harga, peran):
 
     idx = nomor - 1
     lama = data.iloc[idx]
-    print("Data lama:")
-    tampilkan_tabel(
-        ["Nama", "Jenis Sampah", "Berat", "Poin", "Rupiah"],
-        [[lama["Nama"], lama["Jenis"], str(lama["Berat"]) + " kg",
-          str(lama["Poin"]) + " poin", "Rp" + str(lama["Rupiah"])]]
-    )
+    petugas_lama = str(lama.get("Petugas", "petugas"))
+    print("Data lama:", lama["Nama"], "-", lama["Jenis"], "-", lama["Berat"], "kg -", lama["Poin"], "poin - Rp", lama["Rupiah"], "- Petugas:", petugas_lama)
 
     nama_baru = input("Nama baru (kosongkan kalau tidak diubah): ").strip()
     print("Jenis sampah:")
-    baris_harga = []
-    for i in range(len(harga)):
-        baris_harga.append([i + 1, harga[i][0], "Rp" + str(harga[i][1]) + "/kg"])
-    tampilkan_tabel(["No", "Jenis Sampah", "Harga per kg"], baris_harga)
+    cetak_daftar_harga(harga)
     jenis_baru = input("Jenis baru (0 kalau tidak diubah): ")
     berat_baru_teks = input("Berat baru (kosongkan kalau tidak diubah): ")
 
@@ -390,12 +373,8 @@ def hapus(data, peran):
 
     idx = nomor - 1
     hapus_data = data.iloc[idx]
-    print("Data yang dihapus:")
-    tampilkan_tabel(
-        ["Nama", "Jenis Sampah", "Berat", "Poin", "Rupiah"],
-        [[hapus_data["Nama"], hapus_data["Jenis"], str(hapus_data["Berat"]) + " kg",
-          str(hapus_data["Poin"]) + " poin", "Rp" + str(hapus_data["Rupiah"])]]
-    )
+    petugas_hapus = str(hapus_data.get("Petugas", "petugas"))
+    print("Data yang dihapus:", hapus_data["Nama"], "-", hapus_data["Jenis"], "-", hapus_data["Berat"], "kg -", hapus_data["Poin"], "poin - Rp", hapus_data["Rupiah"], "- Petugas:", petugas_hapus)
     yakin = input("Yakin hapus? (y/n): ")
 
     if yakin == "y":
@@ -407,7 +386,7 @@ def hapus(data, peran):
     return data
 
 
-# Tugas: Nafisa (Algoritma Linear Search untuk mencari setoran) >
+# Tugas: Nafisa (Algoritma Linear Search untuk mencari setoran)
 def cari(data):
     print("\nCari Setoran:")
     kata = input("Masukkan nama nasabah atau jenis sampah: ").strip()
@@ -417,27 +396,32 @@ def cari(data):
         return
 
     kata_cari = kata.lower()
-    baris_ditemukan = []
+    ketemu = False
 
+    print("---------------------------------------------------------------------------------")
+    print("No  Nama      Jenis          Berat    Poin      Rupiah         Petugas")
+    print("---------------------------------------------------------------------------------")
+    nomor = 1
     for i in range(len(data)):
         nama = str(data.iloc[i, 0]).lower()
         jenis = str(data.iloc[i, 1]).lower()
 
         if kata_cari in nama or kata_cari in jenis:
             baris = data.iloc[i]
-            baris_ditemukan.append([
-                len(baris_ditemukan) + 1, baris["Nama"], baris["Jenis"],
-                str(baris["Berat"]) + " kg", str(baris["Poin"]) + " poin",
-                "Rp" + str(baris["Rupiah"])
-            ])
+            no_teks = str(nomor).ljust(4)
+            nama_teks = str(baris["Nama"]).ljust(10)
+            jenis_teks = str(baris["Jenis"]).ljust(15)
+            berat_teks = (str(baris["Berat"]) + " kg").ljust(9)
+            poin_teks = (str(baris["Poin"]) + " poin").ljust(10)
+            rupiah_teks = ("Rp" + str(baris["Rupiah"])).ljust(15)
+            petugas_teks = str(baris.get("Petugas", "-"))
+            print(no_teks + nama_teks + jenis_teks + berat_teks + poin_teks + rupiah_teks + petugas_teks)
+            nomor = nomor + 1
+            ketemu = True
+    print("---------------------------------------------------------------------------------")
 
-    if len(baris_ditemukan) == 0:
+    if ketemu == False:
         print("Data tidak ditemukan.")
-    else:
-        tampilkan_tabel(
-            ["No", "Nama", "Jenis Sampah", "Berat", "Poin", "Rupiah"],
-            baris_ditemukan
-        )
 
 
 # Tugas: Nafisa (Algoritma Bubble Sort untuk mengurutkan setoran)
@@ -458,6 +442,7 @@ def urutkan(data):
         print("Pilihan tidak valid.")
         return
 
+    # bubble sort sederhana dengan penukaran tolist() agar index tidak bentrok
     for i in range(len(data)):
         for j in range(len(data) - 1 - i):
             if urut == "3":
@@ -466,7 +451,9 @@ def urutkan(data):
                 perlu_tukar = data.iloc[j, kolom] < data.iloc[j + 1, kolom]
 
             if perlu_tukar:
-                data.iloc[[j, j + 1]] = data.iloc[[j + 1, j]].values
+                temp = data.iloc[j].tolist()
+                data.iloc[j] = data.iloc[j + 1].tolist()
+                data.iloc[j + 1] = temp
 
     print("Data berhasil diurutkan.")
     print("Catatan: urutan ini tidak disimpan ke file dan akan kembali seperti semula saat program dibuka ulang.")
@@ -492,16 +479,13 @@ def laporan(data):
     if total_setoran == 0:
         print("Nasabah tidak ditemukan.")
     else:
-        tampilkan_tabel(
-            ["Keterangan", "Nilai"],
-            [
-                ["Nama nasabah", nama],
-                ["Jumlah setoran", total_setoran],
-                ["Total berat", str(total_berat) + " kg"],
-                ["Total poin", total_poin],
-                ["Total rupiah", "Rp" + str(total_rupiah)]
-            ]
-        )
+        print("------------------------------------")
+        print("Nama nasabah   :", nama)
+        print("Jumlah setoran :", total_setoran)
+        print("Total berat    :", total_berat, "kg")
+        print("Total poin     :", total_poin)
+        print("Total rupiah   : Rp", total_rupiah)
+        print("------------------------------------")
 
 
 # Tugas: Nafisa (Pencairan dana kasir dan validasi saldo)
@@ -523,36 +507,32 @@ def bayar(data, data_bayar, peran):
     for i in range(len(data)):
         if str(data.iloc[i, 0]).lower() == nama_cari:
             ditemukan = True
-            total_rupiah += data.iloc[i, 4]
+            total_rupiah = total_rupiah + data.iloc[i, 4]
 
-    if not ditemukan:
+    if ditemukan == False:
         print("Nasabah tidak ditemukan.")
         return
 
-    # Hitung total yang sudah pernah dibayar nasabah
     total_bayar = 0
     for i in range(len(data_bayar)):
         if str(data_bayar.iloc[i, 0]).lower() == nama_cari:
-            total_bayar += data_bayar.iloc[i, 1]
+            total_bayar = total_bayar + data_bayar.iloc[i, 1]
 
     sisa = total_rupiah - total_bayar
     if sisa <= 0:
         print("Saldo nasabah sudah lunas.")
         return
 
-    tampilkan_tabel(
-        ["Keterangan", "Nilai"],
-        [
-            ["Nama nasabah", nama],
-            ["Total saldo", "Rp" + str(total_rupiah)],
-            ["Sudah dibayar", "Rp" + str(total_bayar)],
-            ["Sisa saldo", "Rp" + str(sisa)]
-        ]
-    )
+    print("------------------------------------")
+    print("Nama nasabah  :", nama)
+    print("Total saldo   : Rp", total_rupiah)
+    print("Sudah dibayar : Rp", total_bayar)
+    print("Sisa saldo    : Rp", sisa)
+    print("------------------------------------")
 
     while True:
         jumlah_teks = input("Jumlah dibayar (Rp): ").strip()
-        if not jumlah_teks.isdigit():
+        if jumlah_teks.isdigit() == False:
             print("Jumlah harus angka bulat tanpa titik atau koma.")
             continue
 
@@ -583,15 +563,10 @@ def bayar(data, data_bayar, peran):
     data_bayar.to_csv("pembayaran.csv", index=False)
 
     print("\nBukti Pembayaran:")
-    tampilkan_tabel(
-        ["Keterangan", "Nilai"],
-        [
-            ["Nama nasabah", nama],
-            ["Jumlah bayar", "Rp" + str(jumlah)],
-            ["Metode", metode],
-            ["Sisa saldo", "Rp" + str(sisa - jumlah)]
-        ]
-    )
+    print("Nama nasabah :", nama)
+    print("Jumlah bayar : Rp", jumlah)
+    print("Metode       :", metode)
+    print("Sisa saldo   : Rp", sisa - jumlah)
     print("Pembayaran berhasil disimpan.")
 
 
@@ -603,7 +578,7 @@ def tukar_poin(data, data_tukar, sembako):
         print("Nama nasabah tidak boleh kosong.")
         return
 
-    if not sembako:
+    if len(sembako) == 0:
         print("Daftar sembako sedang kosong.")
         return
 
@@ -614,40 +589,37 @@ def tukar_poin(data, data_tukar, sembako):
 
     for i in range(len(data)):
         if str(data.iloc[i, 0]).strip().lower() == nama_cari:
-            if not ditemukan:
+            if ditemukan == False:
                 nama_baku = str(data.iloc[i, 0]).strip()
                 ditemukan = True
-            total_poin += data.iloc[i, 3]
+            total_poin = total_poin + data.iloc[i, 3]
 
-    if not ditemukan:
+    if ditemukan == False:
         print("Nasabah tidak ditemukan.")
         return
 
     total_tukar = 0
     for i in range(len(data_tukar)):
         if str(data_tukar.iloc[i, 0]).strip().lower() == nama_cari:
-            total_tukar += data_tukar.iloc[i, 2]
+            total_tukar = total_tukar + data_tukar.iloc[i, 2]
 
     sisa = total_poin - total_tukar
     if sisa <= 0:
         print("Poin nasabah sudah habis.")
         return
 
-    tampilkan_tabel(
-        ["Keterangan", "Nilai"],
-        [
-            ["Nama nasabah", nama_baku],
-            ["Total poin", total_poin],
-            ["Sudah ditukar", str(total_tukar) + " poin"],
-            ["Sisa poin", str(sisa) + " poin"]
-        ]
-    )
+    print("------------------------------------")
+    print("Nama nasabah :", nama_baku)
+    print("Total poin   :", total_poin)
+    print("Sudah ditukar:", total_tukar, "poin")
+    print("Sisa poin    :", sisa, "poin")
+    print("------------------------------------")
 
     print("\nDaftar sembako:")
     tampilkan_sembako(sembako)
 
-    pilih_teks = input(f"Pilih sembako (1-{len(sembako)}): ").strip()
-    if not pilih_teks.isdigit():
+    pilih_teks = input("Pilih sembako (1-" + str(len(sembako)) + "): ").strip()
+    if pilih_teks.isdigit() == False:
         print("Pilihan tidak valid.")
         return
 
@@ -668,22 +640,17 @@ def tukar_poin(data, data_tukar, sembako):
         print("Stok sembako tersebut sedang kosong di gudang.")
         return
 
-    sembako[posisi][2] -= 1
+    sembako[posisi][2] = sembako[posisi][2] - 1
     simpan_sembako(sembako)
 
     data_tukar.loc[len(data_tukar)] = [nama_baku, barang, harga_poin]
     data_tukar.to_csv("penukaran.csv", index=False)
 
     print("\nBukti Penukaran:")
-    tampilkan_tabel(
-        ["Keterangan", "Nilai"],
-        [
-            ["Nama nasabah", nama_baku],
-            ["Sembako", barang],
-            ["Poin dipakai", str(harga_poin) + " poin"],
-            ["Sisa poin", str(sisa - harga_poin) + " poin"]
-        ]
-    )
+    print("Nama nasabah :", nama_baku)
+    print("Sembako      :", barang)
+    print("Poin dipakai :", harga_poin)
+    print("Sisa poin    :", sisa - harga_poin)
     print("Penukaran berhasil disimpan.")
 
 
@@ -692,7 +659,6 @@ def riwayat_transaksi(data, data_bayar, data_tukar):
     print("\nRiwayat Transaksi Nasabah:")
     nama = input("Nama nasabah : ").strip()
 
-    # cek apakah nasabah terdaftar di data setoran
     ada_nasabah = False
     for i in range(len(data)):
         if str(data.iloc[i, 0]).lower() == nama.lower():
@@ -713,25 +679,21 @@ def riwayat_transaksi(data, data_bayar, data_tukar):
         if str(data_tukar.iloc[i, 0]).lower() == nama.lower():
             tukar_list.append(data_tukar.iloc[i])
 
-    print(f"\n1. Riwayat Pembayaran Rupiah ({len(bayar_list)} kali):")
+    print("\n1. Riwayat Pembayaran Rupiah (" + str(len(bayar_list)) + " kali):")
     if len(bayar_list) == 0:
         print("   (Belum pernah mencairkan saldo)")
     else:
-        baris_bayar = []
         for i in range(len(bayar_list)):
             row = bayar_list[i]
-            baris_bayar.append([i + 1, "Rp" + f"{int(row['Jumlah']):,}", row["Metode"]])
-        tampilkan_tabel(["No", "Jumlah dibayar", "Metode"], baris_bayar)
+            print("   " + str(i + 1) + ". Dicairkan Rp" + str(row["Jumlah"]) + " - Metode: " + str(row["Metode"]))
 
-    print(f"\n2. Riwayat Penukaran Sembako ({len(tukar_list)} kali):")
+    print("\n2. Riwayat Penukaran Sembako (" + str(len(tukar_list)) + " kali):")
     if len(tukar_list) == 0:
         print("   (Belum pernah menukarkan poin)")
     else:
-        baris_tukar = []
         for i in range(len(tukar_list)):
             row = tukar_list[i]
-            baris_tukar.append([i + 1, row["Sembako"], str(int(row["Poin"])) + " poin"])
-        tampilkan_tabel(["No", "Sembako", "Poin"], baris_tukar)
+            print("   " + str(i + 1) + ". Menukar " + str(row["Sembako"]) + " - " + str(row["Poin"]) + " poin")
 
 
 # Tugas: Habibi (Dashboard statistik global bank sampah)
@@ -755,35 +717,34 @@ def statistik_bank_sampah(data, data_bayar, data_tukar):
     for i in range(len(data_tukar)):
         total_poin_tukar = total_poin_tukar + int(data_tukar.iloc[i, 2])
 
-    # hitung nasabah unik pakai set supaya nama yang sama tidak dihitung dua kali
     nasabah_unik = set()
     for i in range(len(data)):
         nasabah_unik.add(str(data.iloc[i, 0]).lower())
 
-    tampilkan_tabel(
-        ["Statistik", "Nilai"],
-        [
-            ["Total berat sampah terkumpul", f"{total_berat:.1f} kg"],
-            ["Total transaksi setoran", str(total_setoran) + " kali"],
-            ["Jumlah nasabah terdaftar", str(len(nasabah_unik)) + " orang"],
-            ["Total nilai rupiah sampah", "Rp" + f"{total_rupiah:,}"],
-            ["Total saldo sudah dibayar", "Rp" + f"{total_cair:,}"],
-            ["Sisa saldo belum dibayar", "Rp" + f"{total_rupiah - total_cair:,}"],
-            ["Sisa poin reward beredar", str(total_poin - total_poin_tukar) + " poin"]
-        ]
-    )
+    print("--------------------------------------------------")
+    print("1. Total berat sampah terkumpul :", total_berat, "kg")
+    print("2. Total transaksi setoran      :", total_setoran, "kali")
+    print("3. Jumlah nasabah terdaftar     :", len(nasabah_unik), "orang")
+    print("4. Total nilai rupiah sampah    : Rp", total_rupiah)
+    print("5. Total saldo sudah dibayar    : Rp", total_cair)
+    print("6. Sisa saldo belum dibayar     : Rp", total_rupiah - total_cair)
+    print("7. Sisa poin reward beredar     :", total_poin - total_poin_tukar, "poin")
+    print("--------------------------------------------------")
 
 
 # Tugas: Habibi (Manajemen stok gudang dan restok sembako oleh admin)
 def tampilkan_sembako(sembako):
-    baris_tabel = []
+    print("--------------------------------------------------------")
+    print("No  Nama Sembako                Harga Poin    Stok")
+    print("--------------------------------------------------------")
     for i in range(len(sembako)):
-        baris_tabel.append([
-            i + 1, sembako[i][0], str(sembako[i][1]) + " poin",
-            str(sembako[i][2]) + " unit"
-        ])
-    tampilkan_tabel(["No", "Nama Sembako", "Harga Poin", "Stok"], baris_tabel)
-    
+        no_teks = str(i + 1).ljust(4)
+        nama_teks = str(sembako[i][0]).ljust(28)
+        poin_teks = (str(sembako[i][1]) + " poin").ljust(14)
+        stok_teks = str(sembako[i][2]) + " unit"
+        print(no_teks + nama_teks + poin_teks + stok_teks)
+    print("--------------------------------------------------------")
+
 
 # Tugas: Habibi (Manajemen stok gudang dan restok sembako oleh admin)
 def kelola_sembako(sembako, peran):
@@ -814,7 +775,7 @@ def kelola_sembako(sembako, peran):
 # Tugas: Abizar (Alur program utama dan navigasi menu)
 if __name__ == "__main__":
     banner_selamat_datang()
-    peran = login()
+    peran, nama_petugas = login()
     data = muat_data()
     data_bayar = muat_bayar()
     data_tukar = muat_tukar()
@@ -822,14 +783,14 @@ if __name__ == "__main__":
     sembako = muat_sembako()
 
     while True:
-        tampil_menu(peran)
+        tampil_menu(peran, nama_petugas)
         pilih = input("Pilih menu: ").strip()
 
         if peran == "admin":
             if pilih == "1":
                 tampilkan(data)
             elif pilih == "2":
-                tambah(data, harga)
+                tambah(data, harga, nama_petugas)
             elif pilih == "3":
                 ubah(data, harga, peran)
             elif pilih == "4":
@@ -861,7 +822,7 @@ if __name__ == "__main__":
             if pilih == "1":
                 tampilkan(data)
             elif pilih == "2":
-                tambah(data, harga)
+                tambah(data, harga, nama_petugas)
             elif pilih == "3":
                 cari(data)
             elif pilih == "4":
